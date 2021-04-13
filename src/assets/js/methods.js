@@ -49,7 +49,6 @@ export const set = (type, params) => {
       break;
     case 'selectMode':
       drag();
-      break;
     case 'freeDrawing':
       customParams = {
         stroke: (params && params.stroke) ? params.stroke : state.color,
@@ -95,6 +94,11 @@ export const set = (type, params) => {
 export const applyCropping = () => {
   
   new CropImage(canvas, true, true);
+  drag()
+}
+export const cancelCropping = () => {
+  
+  new CropImage(canvas, false,false,true);
   drag()
 }
 export const redo = () => {
@@ -145,63 +149,8 @@ export const toDataUrl = (url, callback) => {
   xhr.send();
 }
 export const setBackgroundImage = (imageUrl) => {
-  console.log(imageUrl);
-  let img = new Image();
-  toDataUrl(imageUrl, (dataUri) => {
-    img.src = dataUri;
-    if (canvas.width <= img.width || canvas.height <= img.height) {
-      let canvasAspect = canvas.width / canvas.height;
-      let imgAspect = img.width / img.height;
-      let updatedLeft, updatedTop, scaleFactor;
-      if (canvasAspect >= imgAspect) {
-        scaleFactor = canvas.width / img.width;
-        updatedLeft = 0;
-        updatedTop = -((img.height * scaleFactor) - canvas.height) / 2;
-
-      } else {
-        scaleFactor = canvas.height / img.height;
-        updatedTop = 0;
-        updatedLeft = -((img.width * scaleFactor) - canvas.width) / 2;
-      }
-      img.width = canvas.width;
-      img.height = canvas.height;
-
-      canvas.setBackgroundImage(dataUri, canvas.renderAll.bind(canvas), {
-        top: updatedTop,
-        left: updatedLeft,
-        originX: 'left',
-        originY: 'top',
-        scaleX: scaleFactor,
-        scaleY: scaleFactor
-      });
-      canvas.renderAll();
-    } else {
-      let center = canvas.getCenter();
-      canvas.setBackgroundImage(dataUri, canvas.renderAll.bind(canvas), {
-        top: center.top,
-        left: center.left,
-        originX: 'center',
-        originY: 'center'
-      });
-      canvas.renderAll()
-    }
-  });
-}
-export const clear = () => {
-  drag();
-  canvas.clear();
-}
-export const saveImage = () => {
-  drag();
-  return canvas.toDataURL('image/jpeg', 1);
-}
-export const uploadImage = (e) => {
-  drag();
-
-  let reader = new FileReader();
-  reader.onload = function (event) {
-    let imgObj = new Image();
-    imgObj.src = event.target.result;
+  let imgObj = new Image();
+    imgObj.src = imageUrl;
     imgObj.onload = function () {
       let image = new fabric.Image(imgObj);
       if (canvas.width <= image.width || canvas.height <= image.height) {
@@ -242,11 +191,12 @@ export const uploadImage = (e) => {
       }
 
     }
-
-  }
-  if (e.target && e.target.files && e.target.files[0]) {
-    reader.readAsDataURL(e.target.files[0]);
-  }
-
-
+}
+export const clear = () => {
+  drag();
+  canvas.clear();
+}
+export const saveImage = () => {
+  drag();
+  return canvas.toDataURL('image/jpeg', 1);
 }
